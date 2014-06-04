@@ -1,5 +1,5 @@
 {-# LANGUAGE NoMonomorphismRestriction #-}
-module MD4 where
+module MD4(md4) where
 
 import Control.Applicative
 import Control.Monad.State
@@ -8,9 +8,6 @@ import Data.Binary.Put
 import Data.Binary.Get
 import Data.ByteString (ByteString)
 import qualified Data.ByteString as BS
-import Data.ByteString.Lazy (toStrict, fromStrict)
-import Data.Word
-import Data.List (genericLength)
 
 f x y z = x .&. y .|. (complement x) .&. z
 g x y z = x .&. y .|. x .&. z .|. y .&. z
@@ -77,7 +74,6 @@ proc x = do
     modify $ \(a,b,c,d) -> (a+aa, b+bb, c+cc, d+dd)
   where go op params = apply x op `on` params
 
-md4 :: ByteString -> ByteString
 md4 s = output $ execState (go (prep s)) (0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476)
   where go [] = return ()
         go s = proc (take 16 s) >> go (drop 16 s)
@@ -87,23 +83,10 @@ prep = getWords . pad
 pad bs = runPut $ do
   putByteString bs
   putWord8 0x80
-  replicateM_ (mod (55 - length bs) 64) (putWord8 0)
-  putWord64le (8 * genericLength bs)
+  replicateM_ (mod (55 - BS.length bs) 64) (putWord8 0)
+  putWord64le (fromIntegral (BS.length bs) * 8)
 
-getWords :: ByteString -> [Word32]
 getWords = runGet words
-  where words = isEmpty >>= (\e -> if e then return () else fmap (:) getWord32le words)
+  where words = isEmpty >>= (\e -> if e then return [] else liftM2 (:) getWord32le words)
 
-
-prep :: ByteString -> [Word32]
-prep s = add (BS.length s) . pack32le . pad . BS.unpack $ s
-  where add n = (++ map fromIntegral [n .&. 0xffffffff, n .&. 0xffffffff00000000])
-
-pack32le :: [Word8] -> [Word32]
-pack32le = go . map fromIntegral
-  where go [] = []
-        go (a:b:c:d:r) = a + shiftL b 8 + shiftL c 16 + shiftL d 24 : go r
-
-pad bs = bs ++ [0x80] ++ take (mod (55 - length bs) 64) (repeat 0)
-
-output (a,b,c,d) = toStrict $ runPut (mapM_ putWord32le [a,b,c,d])
+output (a,b,c,d) = runPut (mapM_ putWord32le [a,b,c,d])
