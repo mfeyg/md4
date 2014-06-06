@@ -77,17 +77,15 @@ md4 s = output $ execState (go (prep s)) (0x67452301, 0xefcdab89, 0x98badcfe, 0x
 
 prep = getWords . pad
 
-pad bs = runPut $ do
-  len <- putAndGetLength bs
-  let bytes = fromIntegral $ len `div` 8
-  putWord8 0x80
-  replicateM_ (55 - bytes `mod` 64) (putWord8 0)
-  putWord64le len
+pad bs = runPut $ putAndCountBytes bs >>= \len ->
+                  putWord8 0x80
+               *> replicateM_ (55 - (fromIntegral len) `mod` 64) (putWord8 0)
+               *> putWord64le (len * 8)
 
-putAndGetLength = L.foldl go (pure 0)
-  where go m w = (+8) <$> (m <* putWord8 w)
+putAndCountBytes = L.foldl go (pure 0)
+  where go m w = (+1) <$> (m <* putWord8 w)
 
 getWords = runGet words
-  where words = isEmpty >>= (\e -> if e then pure [] else (:) <$> getWord32le <*> words)
+  where words = isEmpty >>= \e -> if e then pure [] else (:) <$> getWord32le <*> words
 
 output (a,b,c,d) = L.toStrict . runPut $ mapM_ putWord32le [a,b,c,d]
