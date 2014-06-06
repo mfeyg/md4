@@ -6,7 +6,7 @@ import Control.Monad.State
 import Data.Bits
 import Data.Binary.Put
 import Data.Binary.Get
-import qualified Data.ByteString as BS (length)
+import qualified Data.ByteString.Lazy as L
 
 f x y z = x .&. y .|. (complement x) .&. z
 g x y z = x .&. y .|. x .&. z .|. y .&. z
@@ -80,12 +80,16 @@ md4 s = output $ execState (go (prep s)) (0x67452301, 0xefcdab89, 0x98badcfe, 0x
 prep = getWords . pad
 
 pad bs = runPut $ do
-  putByteString bs
+  len <- putAndGetLength bs
+  let bytes = fromIntegral $ len `div` 8
   putWord8 0x80
-  replicateM_ (mod (55 - BS.length bs) 64) (putWord8 0)
-  putWord64le (fromIntegral (BS.length bs) * 8)
+  replicateM_ (55 - bytes `mod` 64) (putWord8 0)
+  putWord64le len
+
+putAndGetLength = L.foldl go (pure 0)
+  where go m w = (+8) <$> (m <* putWord8 w)
 
 getWords = runGet words
   where words = isEmpty >>= (\e -> if e then return [] else (:) <$> getWord32le <*> words)
 
-output (a,b,c,d) = runPut (mapM_ putWord32le [a,b,c,d])
+output (a,b,c,d) = L.toStrict $ runPut (mapM_ putWord32le [a,b,c,d])
