@@ -6,8 +6,7 @@ import Control.Monad.State
 import Data.Bits
 import Data.Binary.Put
 import Data.Binary.Get
-import Data.ByteString (ByteString)
-import qualified Data.ByteString as BS
+import qualified Data.ByteString as BS (length)
 
 f x y z = x .&. y .|. (complement x) .&. z
 g x y z = x .&. y .|. x .&. z .|. y .&. z
@@ -31,7 +30,7 @@ get4 (_,_,_,x) = x
 op f n k s x a b c d =
   rotateL (a + (f b c d) + (x!!k) + n) s
 
-op1 = op f 0x0
+op1 = op f 0
 op2 = op g 0x5a827999
 op3 = op h 0x6ed9eba1
 
@@ -87,6 +86,6 @@ pad bs = runPut $ do
   putWord64le (fromIntegral (BS.length bs) * 8)
 
 getWords = runGet words
-  where words = isEmpty >>= (\e -> if e then return [] else liftM2 (:) getWord32le words)
+  where words = isEmpty >>= (\e -> if e then return [] else (:) <$> getWord32le <*> words)
 
 output (a,b,c,d) = runPut (mapM_ putWord32le [a,b,c,d])
