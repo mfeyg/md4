@@ -57,22 +57,20 @@ apply x op p k s = p go (gets get1, modify . store1)
            store =<< (op k s x <$> a <*> b <*> c <*> d)
 
 on app = go
-  where go [] = return ()
+  where go [] = pure ()
         go (k1:s1:k2:s2:k3:s3:k4:s4:r)
              = app abcd k1 s1
-            >> app dabc k2 s2
-            >> app cdab k3 s3
-            >> app bcda k4 s4
-            >> go r
+            *> app dabc k2 s2
+            *> app cdab k3 s3
+            *> app bcda k4 s4
+            *> go r
 
-proc x = do
-    (aa,bb,cc,dd) <- get
-    go op1 params1
-    go op2 params2
-    go op3 params3
-    modify $ \(a,b,c,d) -> (a+aa, b+bb, c+cc, d+dd)
-  where go op params = apply x op `on` params
-
+proc x = (modify . add) =<< (get <* go op1 params1
+                                 <* go op2 params2
+                                 <* go op3 params3)
+  where add (a,b,c,d) (a',b',c',d') = (a+a', b+b', c+c', d+d')
+        go op params = apply x op `on` params
+        
 md4 s = output $ execState (go (prep s)) (0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476)
   where go [] = return ()
         go s = proc (take 16 s) >> go (drop 16 s)
@@ -90,6 +88,6 @@ putAndGetLength = L.foldl go (pure 0)
   where go m w = (+8) <$> (m <* putWord8 w)
 
 getWords = runGet words
-  where words = isEmpty >>= (\e -> if e then return [] else (:) <$> getWord32le <*> words)
+  where words = isEmpty >>= (\e -> if e then pure [] else (:) <$> getWord32le <*> words)
 
-output (a,b,c,d) = L.toStrict $ runPut (mapM_ putWord32le [a,b,c,d])
+output (a,b,c,d) = L.toStrict . runPut $ mapM_ putWord32le [a,b,c,d]
