@@ -1,5 +1,5 @@
 {-# LANGUAGE NoMonomorphismRestriction #-}
-module MD4(md4) where
+module Data.Digest.Pure.MD4 (md4) where
 
 import Control.Applicative
 import Control.Monad.State
@@ -8,7 +8,7 @@ import Data.Binary.Put
 import Data.Binary.Get
 import qualified Data.ByteString.Lazy as L
 
-f x y z = x .&. y .|. (complement x) .&. z
+f x y z = x .&. y .|. complement x .&. z
 g x y z = x .&. y .|. x .&. z .|. y .&. z
 h x y z = x `xor` y `xor` z
 
@@ -28,7 +28,7 @@ get3 (_,_,x,_) = x
 get4 (_,_,_,x) = x
 
 op f n k s x a b c d =
-  rotateL (a + (f b c d) + (x!!k) + n) s
+  rotateL (a + f b c d + (x!!k) + n) s
 
 op1 = op f 0
 op2 = op g 0x5a827999
@@ -79,7 +79,7 @@ prep = getWords . pad
 
 pad bs = runPut $ putAndCountBytes bs >>= \len ->
                   putWord8 0x80
-               *> replicateM_ (55 - (fromIntegral len) `mod` 64) (putWord8 0)
+               *> replicateM_ (mod (55 - fromIntegral len)  64) (putWord8 0)
                *> putWord64le (len * 8)
 
 putAndCountBytes = L.foldl go (pure 0)
