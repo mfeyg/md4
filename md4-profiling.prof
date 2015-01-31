@@ -1,0 +1,116 @@
+	Wed Jul  2 08:32 2014 Time and Allocation Profiling Report  (Final)
+
+	   md4-profiling +RTS -N -p -s -h -i0.1 -RTS testdata
+
+	total time  =        1.09 secs   (1086 ticks @ 1000 us, 1 processor)
+	total alloc = 1,520,356,040 bytes  (excludes profiling overheads)
+
+COST CENTRE         MODULE               %time %alloc
+
+apply.go            Data.Digest.Pure.MD4  32.0   33.5
+on.go               Data.Digest.Pure.MD4  26.4   34.3
+putAndCountBytes.go Data.Digest.Pure.MD4   9.9   23.7
+op                  Data.Digest.Pure.MD4   4.3    0.8
+apply               Data.Digest.Pure.MD4   3.8    0.8
+proc                Data.Digest.Pure.MD4   2.9    0.4
+md4                 Data.Digest.Pure.MD4   2.1    0.0
+getWords.words.\    Data.Digest.Pure.MD4   2.1    2.2
+md4.go              Data.Digest.Pure.MD4   1.8    1.0
+getWords.words      Data.Digest.Pure.MD4   1.6    0.9
+get3                Data.Digest.Pure.MD4   1.5    0.0
+proc.go             Data.Digest.Pure.MD4   1.4    0.1
+store2              Data.Digest.Pure.MD4   1.4    0.5
+store4              Data.Digest.Pure.MD4   1.4    0.5
+get2                Data.Digest.Pure.MD4   1.4    0.0
+get4                Data.Digest.Pure.MD4   1.2    0.0
+get1                Data.Digest.Pure.MD4   1.1    0.0
+
+
+                                                                       individual     inherited
+COST CENTRE                 MODULE                   no.     entries  %time %alloc   %time %alloc
+
+MAIN                        MAIN                      50           0    0.0    0.0   100.0  100.0
+ main                       Main                     101           0    0.0    0.0   100.0  100.0
+  main.\                    Main                     102           1    0.0    0.0   100.0  100.0
+   main.\.\                 Main                     103           1    0.3    0.1   100.0  100.0
+    main.\.\.\              Main                     180          16    0.0    0.0     0.0    0.0
+    md4                     Data.Digest.Pure.MD4     104           1    2.1    0.0    99.7   99.9
+     output                 Data.Digest.Pure.MD4     179           1    0.0    0.0     0.0    0.0
+     md4.go                 Data.Digest.Pure.MD4     117       15627    1.8    1.0    83.4   73.0
+      proc                  Data.Digest.Pure.MD4     121       15626    2.9    0.4    81.6   72.0
+       op3                  Data.Digest.Pure.MD4     170       15626    0.0    0.0     0.0    0.0
+       op2                  Data.Digest.Pure.MD4     161       15626    0.0    0.0     0.0    0.0
+       op1                  Data.Digest.Pure.MD4     143       15626    0.1    0.0     0.1    0.0
+       params1              Data.Digest.Pure.MD4     141       15626    0.0    0.0     0.0    0.0
+       params2              Data.Digest.Pure.MD4     140       15626    0.0    0.0     0.0    0.0
+       proc.go              Data.Digest.Pure.MD4     124       46878    1.4    0.1    78.5   71.5
+        apply               Data.Digest.Pure.MD4     144           0    2.0    0.0     7.2    0.0
+         get4               Data.Digest.Pure.MD4     148      750048    1.2    0.0     1.2    0.0
+         get3               Data.Digest.Pure.MD4     147      750048    1.5    0.0     1.5    0.0
+         get2               Data.Digest.Pure.MD4     146      750048    1.4    0.0     1.4    0.0
+         get1               Data.Digest.Pure.MD4     145      750048    1.1    0.0     1.1    0.0
+        on                  Data.Digest.Pure.MD4     125       46878    0.0    0.0    70.0   71.5
+         on.go              Data.Digest.Pure.MD4     126      234390   26.4   34.3    70.0   71.4
+          apply             Data.Digest.Pure.MD4     127      750048    1.7    0.8    43.6   37.1
+           apply.go         Data.Digest.Pure.MD4     142           0    1.6    0.0     1.6    0.0
+           abcd             Data.Digest.Pure.MD4     137      187512    0.1    0.0     8.7    9.1
+            apply.go        Data.Digest.Pure.MD4     138      187512    6.6    8.4     8.7    9.1
+             h              Data.Digest.Pure.MD4     171       62504    0.0    0.0     0.0    0.0
+             g              Data.Digest.Pure.MD4     162       62504    0.0    0.0     0.0    0.0
+             f              Data.Digest.Pure.MD4     150       62504    0.0    0.0     0.0    0.0
+             op             Data.Digest.Pure.MD4     149      187512    1.1    0.2     1.2    0.2
+              h             Data.Digest.Pure.MD4     172           0    0.1    0.0     0.1    0.0
+             store1         Data.Digest.Pure.MD4     139      187512    0.8    0.5     0.8    0.5
+           dabc             Data.Digest.Pure.MD4     134      187512    0.4    0.0     9.8    9.1
+            apply.go        Data.Digest.Pure.MD4     135      187512    7.2    8.4     9.4    9.1
+             h              Data.Digest.Pure.MD4     173       62504    0.0    0.0     0.0    0.0
+             g              Data.Digest.Pure.MD4     164       62504    0.0    0.0     0.0    0.0
+             f              Data.Digest.Pure.MD4     153       62504    0.0    0.0     0.0    0.0
+             op             Data.Digest.Pure.MD4     152      187512    0.8    0.2     0.8    0.2
+             store4         Data.Digest.Pure.MD4     136      187512    1.4    0.5     1.4    0.5
+           cdab             Data.Digest.Pure.MD4     131      187512    0.2    0.0    10.0    9.1
+            apply.go        Data.Digest.Pure.MD4     132      187512    8.1    8.4     9.9    9.1
+             h              Data.Digest.Pure.MD4     175       62504    0.0    0.0     0.0    0.0
+             g              Data.Digest.Pure.MD4     166       62504    0.0    0.0     0.0    0.0
+             f              Data.Digest.Pure.MD4     156       62504    0.0    0.0     0.0    0.0
+             op             Data.Digest.Pure.MD4     155      187512    1.0    0.2     1.0    0.2
+             store3         Data.Digest.Pure.MD4     133      187512    0.7    0.5     0.7    0.5
+           bcda             Data.Digest.Pure.MD4     128      187512    0.4    0.0    11.7    9.1
+            apply.go        Data.Digest.Pure.MD4     129      187512    8.6    8.4    11.3    9.1
+             h              Data.Digest.Pure.MD4     177       62504    0.0    0.0     0.0    0.0
+             g              Data.Digest.Pure.MD4     168       62504    0.0    0.0     0.0    0.0
+             f              Data.Digest.Pure.MD4     159       62504    0.0    0.0     0.0    0.0
+             op             Data.Digest.Pure.MD4     158      187512    1.4    0.2     1.4    0.2
+             store2         Data.Digest.Pure.MD4     130      187512    1.4    0.5     1.4    0.5
+       params3              Data.Digest.Pure.MD4     123       15626    0.0    0.0     0.0    0.0
+       proc.add             Data.Digest.Pure.MD4     122       15626    0.1    0.1     0.1    0.1
+     prep                   Data.Digest.Pure.MD4     106           0    0.0    0.0    14.2   26.9
+      pad                   Data.Digest.Pure.MD4     111           1    0.0    0.0     9.9   23.7
+       pad.\                Data.Digest.Pure.MD4     115           1    0.0    0.0     0.0    0.0
+       putAndCountBytes     Data.Digest.Pure.MD4     112           1    0.0    0.0     9.9   23.7
+        putAndCountBytes.go Data.Digest.Pure.MD4     113     1000001    9.9   23.7     9.9   23.7
+         pad.\              Data.Digest.Pure.MD4     116           0    0.0    0.0     0.0    0.0
+      getWords              Data.Digest.Pure.MD4     108           0    0.6    0.0     4.2    3.2
+       getWords.words       Data.Digest.Pure.MD4     110           0    1.6    0.9     3.7    3.2
+        getWords.words.\    Data.Digest.Pure.MD4     114      250017    2.1    2.2     2.1    2.2
+ CAF                        Data.Digest.Pure.MD4      99           0    0.0    0.0     0.0    0.0
+  getWords                  Data.Digest.Pure.MD4     107           1    0.0    0.0     0.0    0.0
+   getWords.words           Data.Digest.Pure.MD4     109           1    0.0    0.0     0.0    0.0
+  prep                      Data.Digest.Pure.MD4     105           1    0.0    0.0     0.0    0.0
+ CAF                        Main                      98           0    0.0    0.0     0.0    0.0
+  main                      Main                     100           1    0.0    0.0     0.0    0.0
+   main.\                   Main                     181           0    0.0    0.0     0.0    0.0
+    main.\.\                Main                     182           0    0.0    0.0     0.0    0.0
+     main.\.\.\             Main                     183           0    0.0    0.0     0.0    0.0
+ CAF                        GHC.Conc.Signal           91           0    0.0    0.0     0.0    0.0
+ CAF                        GHC.IO.Encoding           84           0    0.0    0.0     0.0    0.0
+ CAF                        GHC.IO.Encoding.Iconv     82           0    0.0    0.0     0.0    0.0
+ CAF                        GHC.IO.FD                 77           0    0.0    0.0     0.0    0.0
+ CAF                        GHC.IO.Handle.FD          75           0    0.0    0.0     0.0    0.0
+ CAF                        System.Posix.Internals    64           0    0.0    0.0     0.0    0.0
+ CAF                        GHC.Event.Control         63           0    0.0    0.0     0.0    0.0
+ CAF                        GHC.Event.Internal        62           0    0.0    0.0     0.0    0.0
+ CAF                        GHC.Event.Thread          58           0    0.0    0.0     0.0    0.0
+  main                      Main                     118           0    0.0    0.0     0.0    0.0
+   main.\                   Main                     119           0    0.0    0.0     0.0    0.0
+    main.\.\                Main                     120           0    0.0    0.0     0.0    0.0
