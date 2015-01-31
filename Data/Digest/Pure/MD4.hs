@@ -1,4 +1,5 @@
 {-# LANGUAGE NoMonomorphismRestriction #-}
+{-# LANGUAGE BangPatterns #-}
 module Data.Digest.Pure.MD4 (md4) where
 
 import Control.Applicative
@@ -7,6 +8,7 @@ import Data.Bits
 import Data.Binary.Put
 import Data.Binary.Get
 import qualified Data.ByteString.Lazy as L
+import Data.Word
 
 f x y z = x .&. y .|. complement x .&. z
 g x y z = x .&. y .|. x .&. z .|. y .&. z
@@ -17,15 +19,17 @@ dabc f a b c d = f d a b c
 cdab f a b c d = f c d a b
 bcda f a b c d = f b c d a
 
-store1 x (a,b,c,d) = (x,b,c,d)
-store2 x (a,b,c,d) = (a,x,c,d)
-store3 x (a,b,c,d) = (a,b,x,d)
-store4 x (a,b,c,d) = (a,b,c,x)
+data State = Vals !Word32 !Word32 !Word32 !Word32
 
-get1 (x,_,_,_) = x
-get2 (_,x,_,_) = x
-get3 (_,_,x,_) = x
-get4 (_,_,_,x) = x
+store1 x (Vals a b c d) = Vals x b c d
+store2 x (Vals a b c d) = Vals a x c d
+store3 x (Vals a b c d) = Vals a b x d
+store4 x (Vals a b c d) = Vals a b c x
+
+get1 (Vals x _ _ _) = x
+get2 (Vals _ x _ _) = x
+get3 (Vals _ _ x _) = x
+get4 (Vals _ _ _ x) = x
 
 op f n k s x a b c d =
   rotateL (a + f b c d + (x!!k) + n) s
@@ -65,15 +69,15 @@ on app = go
             *> app bcda k4 s4
             *> go r
 
-proc x = (modify . add) =<< (get <* go op1 params1
-                                 <* go op2 params2
-                                 <* go op3 params3)
-  where add (a,b,c,d) (a',b',c',d') = (a+a', b+b', c+c', d+d')
+proc !x = (modify . add) =<< (get <* go op1 params1
+                                  <* go op2 params2
+                                  <* go op3 params3)
+  where add (Vals a b c d) (Vals a' b' c' d') = Vals (a+a') (b+b') (c+c') (d+d')
         go op params = apply x op `on` params
         
-md4 s = output $ execState (go (prep s)) (0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476)
-  where go [] = return ()
-        go s = proc (take 16 s) >> go (drop 16 s)
+md4 s = output $ execState (go (prep s) (return ())) (Vals 0x67452301 0xefcdab89 0x98badcfe 0x10325476)
+  where go [] m = m
+        go !s m = go (drop 16 s) $ m >> proc (take 16 s)
 
 prep = getWords . pad
 
@@ -82,10 +86,12 @@ pad bs = runPut $ putAndCountBytes bs >>= \len ->
                *> replicateM_ (mod (55 - fromIntegral len)  64) (putWord8 0)
                *> putWord64le (len * 8)
 
-putAndCountBytes = L.foldl go (pure 0)
-  where go m w = (+1) <$> (m <* putWord8 w)
+putAndCountBytes = go 0
+  where go !n s = case L.uncons s of
+                    Just (w, s') -> putWord8 w >> go (n+1) s'
+                    Nothing      -> return $! n
 
 getWords = runGet words
   where words = isEmpty >>= \e -> if e then pure [] else (:) <$> getWord32le <*> words
 
-output (a,b,c,d) = L.toStrict . runPut $ mapM_ putWord32le [a,b,c,d]
+output (Vals a b c d) = L.toStrict . runPut $ mapM_ putWord32le [a,b,c,d]
